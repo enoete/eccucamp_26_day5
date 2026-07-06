@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Day 5 — Explore. Capture. Wonder. | Kittivisianwood AI Studio 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A1628;--navy2:#112240;--coral:#E8573A;--teal:#00C9B1;
+  --gold:#F0A500;--cream:#F5F0E8;--cream2:#EDE8DF;--white:#FFFFFF;
+  --gray:#8892A4;--light:#D1D9E6;--purple:#7B5EA7;--green:#2ECC71;
+  --red:#E74C3C;--blue:#3498DB;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'Space Mono',monospace;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-body);background:var(--navy);color:var(--cream)}
+
+/* ── SLIDE ENGINE ── */
+.deck{width:100vw;height:100vh;position:relative}
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:center;align-items:flex-start;padding:56px 72px;
+  opacity:0;pointer-events:none;transition:opacity 0.5s ease;overflow:hidden;
+}
+.slide.active{opacity:1;pointer-events:all}
+
+/* ── CONTROLS ── */
+.controls{position:fixed;bottom:28px;right:36px;display:flex;gap:12px;z-index:200;align-items:center}
+.ctrl-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--cream);font-family:var(--font-mono);font-size:12px;padding:8px 18px;border-radius:6px;cursor:pointer;transition:all 0.2s}
+.ctrl-btn:hover{background:var(--teal);color:var(--navy);border-color:var(--teal)}
+.slide-counter{font-family:var(--font-mono);font-size:11px;color:var(--gray);letter-spacing:1px}
+.session-indicator{position:fixed;top:20px;right:36px;font-family:var(--font-mono);font-size:10px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;z-index:200}
+.progress-bar{position:fixed;bottom:0;left:0;height:3px;background:var(--teal);transition:width 0.4s ease;z-index:200}
+
+/* ── BACKGROUNDS ── */
+.bg-navy{background:var(--navy)}
+.bg-navy2{background:var(--navy2)}
+.bg-dark{background:#060E1C}
+.bg-energizer{background:linear-gradient(135deg,#0A0A1E,#1a0520)}
+.bg-luma{background:linear-gradient(135deg,#060E1C,#0d1f3c)}
+.bg-plask{background:linear-gradient(135deg,#0a0a28,#1a1040)}
+.bg-week2{background:linear-gradient(135deg,#0A1628,#1a2840)}
+.bg-close{background:linear-gradient(135deg,#060E1C,#0d2020)}
+
+/* ── TYPE ── */
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:4px;color:var(--teal);text-transform:uppercase;margin-bottom:16px}
+.eyebrow.coral{color:var(--coral)}
+.eyebrow.gold{color:var(--gold)}
+.eyebrow.purple{color:var(--purple)}
+.eyebrow.green{color:var(--green)}
+.eyebrow.blue{color:var(--blue)}
+.slide-title{font-family:var(--font-display);font-size:clamp(48px,6.5vw,96px);line-height:0.9;color:var(--white);margin-bottom:20px}
+.slide-title .accent{color:var(--coral)}
+.slide-title .teal{color:var(--teal)}
+.slide-title .gold{color:var(--gold)}
+.slide-title .purple{color:var(--purple)}
+.body-text{font-size:clamp(14px,1.5vw,17px);line-height:1.8;color:var(--light);max-width:700px}
+.body-text strong{color:var(--teal)}
+
+.big-quote{
+  font-family:var(--font-display);font-size:clamp(28px,3.8vw,58px);
+  line-height:1.1;color:var(--white);max-width:820px;
+  border-left:4px solid var(--teal);padding-left:32px;
+}
+.big-quote.coral{border-left-color:var(--coral)}
+.big-quote.gold{border-left-color:var(--gold)}
+.big-quote.purple{border-left-color:var(--purple)}
+.big-quote.green{border-left-color:var(--green)}
+
+/* ── ALERT SYSTEM ── */
+.alert-card{display:flex;align-items:flex-start;gap:18px;padding:18px 22px;border-radius:10px;max-width:760px;width:100%;margin:8px 0}
+.alert-card.red{background:rgba(231,76,60,0.12);border:2px solid var(--red)}
+.alert-card.gold{background:rgba(240,165,0,0.1);border:2px solid var(--gold)}
+.alert-card.pin{background:rgba(0,201,177,0.08);border:2px solid var(--teal)}
+.alert-card.green{background:rgba(46,204,113,0.08);border:2px solid var(--green)}
+.alert-card.purple{background:rgba(123,94,167,0.08);border:2px solid var(--purple)}
+.alert-icon{font-size:28px;flex-shrink:0;line-height:1;margin-top:2px}
+.alert-label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;font-weight:700}
+.alert-card.red .alert-label{color:var(--red)}
+.alert-card.gold .alert-label{color:var(--gold)}
+.alert-card.pin .alert-label{color:var(--teal)}
+.alert-card.green .alert-label{color:var(--green)}
+.alert-card.purple .alert-label{color:var(--purple)}
+.alert-text{font-size:14px;line-height:1.6;color:var(--cream)}
+.alert-text strong{color:var(--white)}
+
+/* ── LAYOUT ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:36px;width:100%;max-width:960px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;width:100%;max-width:1060px}
+
+/* ── CARDS ── */
+.info-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:20px 22px}
+.info-card h3{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.info-card p,.info-card li{font-size:13px;color:var(--light);line-height:1.6}
+.info-card ul{list-style:none;padding:0}
+.info-card li{padding:5px 0 5px 14px;position:relative;border-bottom:1px solid rgba(255,255,255,0.04)}
+.info-card li:last-child{border-bottom:none}
+.info-card li::before{content:'▸';position:absolute;left:0;font-size:10px;top:7px;color:var(--teal)}
+.info-card.teal-border{border-left:3px solid var(--teal)}
+.info-card.coral-border{border-left:3px solid var(--coral)}
+.info-card.gold-border{border-left:3px solid var(--gold)}
+.info-card.purple-border{border-left:3px solid var(--purple)}
+.info-card.green-border{border-left:3px solid var(--green)}
+.info-card h3.teal{color:var(--teal)}
+.info-card h3.coral{color:var(--coral)}
+.info-card h3.gold{color:var(--gold)}
+.info-card h3.purple{color:var(--purple)}
+.info-card h3.green{color:var(--green)}
+.info-card.coral-border li::before{color:var(--coral)}
+.info-card.gold-border li::before{color:var(--gold)}
+.info-card.purple-border li::before{color:var(--purple)}
+.info-card.green-border li::before{color:var(--green)}
+
+/* ── SPLAT PRESENTATION ── */
+.splat-format{display:flex;flex-direction:column;gap:10px;max-width:640px;width:100%}
+.splat-step{display:flex;gap:16px;align-items:flex-start;padding:12px 16px;border-radius:8px;background:rgba(255,255,255,0.03)}
+.splat-icon{font-size:24px;flex-shrink:0}
+.splat-body{}
+.splat-title{font-size:13px;font-weight:600;color:var(--white);margin-bottom:2px}
+.splat-desc{font-size:12px;color:var(--gray);line-height:1.5}
+
+/* ── INDUSTRY USE CASES ── */
+.use-cases{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:820px;width:100%}
+.use-case{padding:16px 18px;border-radius:8px;background:rgba(255,255,255,0.03);border-left:3px solid var(--teal)}
+.use-case-icon{font-size:20px;margin-bottom:6px}
+.use-case-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px}
+.use-case-desc{font-size:12px;color:var(--gray);line-height:1.5}
+
+/* ── REFLECTION PROMPTS ── */
+.reflection-list{display:flex;flex-direction:column;gap:10px;max-width:680px;width:100%}
+.r-prompt{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;border-radius:8px;background:rgba(255,255,255,0.03);border-left:3px solid var(--teal)}
+.r-num{font-family:var(--font-display);font-size:28px;color:var(--teal);flex-shrink:0;line-height:1}
+.r-text{font-size:13px;color:var(--light);line-height:1.6}
+
+/* ── PLASK WORKFLOW ── */
+.plask-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:920px;width:100%}
+.plask-step{background:rgba(123,94,167,0.08);border:1px solid rgba(123,94,167,0.2);border-radius:10px;padding:16px;text-align:center}
+.plask-step-icon{font-size:28px;margin-bottom:8px}
+.plask-step-num{font-family:var(--font-display);font-size:13px;color:var(--purple);letter-spacing:1px;margin-bottom:4px}
+.plask-step-title{font-size:12px;font-weight:700;color:var(--white);margin-bottom:4px}
+.plask-step-desc{font-size:11px;color:var(--gray);line-height:1.4}
+
+/* ── MOVEMENT IDEAS ── */
+.movement-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:780px;width:100%}
+.movement-card{padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;text-align:center}
+.movement-icon{font-size:24px;margin-bottom:6px}
+.movement-name{font-size:12px;font-weight:600;color:var(--white);margin-bottom:3px}
+.movement-desc{font-size:10px;color:var(--gray);line-height:1.4}
+
+/* ── WEEK 2 PREVIEW ── */
+.week2-days{display:flex;flex-direction:column;gap:10px;max-width:800px;width:100%}
+.w2-day{display:grid;grid-template-columns:80px 60px 1fr;gap:16px;align-items:center;padding:14px 18px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07)}
+.w2-day-num{font-family:var(--font-display);font-size:32px;line-height:1}
+.w2-day-date{font-family:var(--font-mono);font-size:10px;color:var(--gray);letter-spacing:0.5px;line-height:1.4}
+.w2-day-content{}
+.w2-day-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:3px}
+.w2-day-desc{font-size:12px;color:var(--gray);line-height:1.4}
+.w2-day.highlight{border-color:rgba(232,87,58,0.3);background:rgba(232,87,58,0.04)}
+.w2-day.highlight .w2-day-num{color:var(--coral)}
+.w2-day:not(.highlight) .w2-day-num{color:rgba(255,255,255,0.2)}
+
+/* ── PORTFOLIO SPREAD ── */
+.portfolio-spread{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:820px;width:100%}
+.portfolio-page{background:var(--navy);border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden}
+.portfolio-page-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase}
+.portfolio-page.luma .portfolio-page-header{color:var(--teal);background:rgba(0,201,177,0.06)}
+.portfolio-page.plask .portfolio-page-header{color:var(--purple);background:rgba(123,94,167,0.06)}
+.portfolio-page-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.portfolio-item{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--light);line-height:1.5}
+.portfolio-item-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+/* ── CLOSE CEREMONY ── */
+.close-questions{display:flex;flex-direction:column;gap:10px;max-width:680px;width:100%}
+.close-q{padding:14px 20px;border-radius:8px;background:rgba(255,255,255,0.03)}
+.close-q-label{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.close-q-text{font-size:14px;color:var(--cream);line-height:1.5}
+
+/* ── SESSION DIVIDER ── */
+.session-divider{background:var(--navy2);align-items:center;justify-content:center;text-align:center}
+.session-number{font-family:var(--font-display);font-size:200px;color:rgba(255,255,255,0.03);line-height:1;position:absolute}
+.session-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px}
+.session-tag{font-family:var(--font-mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:6px 18px;border-radius:20px}
+.session-name{font-family:var(--font-display);font-size:clamp(32px,4.5vw,60px);color:var(--white);text-align:center;line-height:1.1}
+.session-time{font-family:var(--font-mono);font-size:12px;color:var(--gray)}
+
+/* ── NAVIGATOR ── */
+#nav-overlay{display:none;position:fixed;inset:0;background:rgba(6,14,28,0.96);z-index:500;overflow-y:auto;padding:40px 48px}
+.nav-session-label{font-family:var(--font-mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.nav-slides-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.nav-slide-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;cursor:pointer;transition:all 0.15s;text-align:left;min-width:160px;max-width:220px;flex:1}
+.nav-slide-btn:hover{background:rgba(0,201,177,0.12);border-color:rgba(0,201,177,0.4)}
+.nav-slide-btn.current-slide{border-color:var(--teal);background:rgba(0,201,177,0.1)}
+.nav-slide-num{font-family:var(--font-display);font-size:20px;line-height:1;margin-bottom:4px}
+.nav-slide-label{font-size:11px;color:var(--light);line-height:1.4}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ░░ STANDBY ░░ -->
+<div class="slide bg-dark active" data-session="Standby">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(0,201,177,0.06),transparent 60%)"></div>
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+    <div style="font-family:var(--font-display);font-size:13px;letter-spacing:4px;color:var(--teal);text-transform:uppercase">Kittivisianwood AI Studio</div>
+    <div style="font-family:var(--font-display);font-size:clamp(52px,8vw,88px);color:rgba(255,255,255,0.08);line-height:1;text-align:center">EXPLORE.<br>CAPTURE.<br>WONDER.</div>
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--gray);letter-spacing:3px">DAY 5 · FRIDAY · JULY 17 2026</div>
+    <div style="margin-top:20px;display:flex;gap:24px">
+      <div style="text-align:center"><div style="font-size:24px">🌍</div><div style="font-family:var(--font-mono);font-size:9px;color:var(--gray);letter-spacing:1px;margin-top:4px">Luma AI</div></div>
+      <div style="text-align:center"><div style="font-size:24px">🕺</div><div style="font-family:var(--font-mono);font-size:9px;color:var(--gray);letter-spacing:1px;margin-top:4px">Plask.ai</div></div>
+      <div style="text-align:center"><div style="font-size:24px">🎉</div><div style="font-family:var(--font-mono);font-size:9px;color:var(--gray);letter-spacing:1px;margin-top:4px">Week 1 Done</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ ENERGIZER ░░ -->
+<div class="slide bg-energizer" data-session="Energizer">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(0,201,177,0.06),transparent 60%)"></div>
+  <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:3px;color:var(--teal);text-transform:uppercase;margin-bottom:16px">⚡ 15 Minutes · Energizer</div>
+  <div class="slide-title" style="font-size:clamp(52px,7vw,100px);margin-bottom:8px">YOUR<br><span class="teal">CALL.</span></div>
+  <div style="font-family:var(--font-mono);font-size:13px;color:var(--gray);letter-spacing:1px">Instructor runs the energizer live.</div>
+</div>
+
+<!-- ░░ TODAY'S MOOD ░░ -->
+<div class="slide bg-navy" data-session="Session 1">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 70% 30%,rgba(0,201,177,0.06),transparent 55%)"></div>
+  <div class="eyebrow">Day 5</div>
+  <div class="slide-title" style="font-size:clamp(48px,6.5vw,92px);margin-bottom:24px">NO CLIENT<br>PRESSURE.<br><span class="teal">JUST DISCOVERY.</span></div>
+  <div class="body-text" style="margin-bottom:28px">Today belongs to you. Two experiences that expand what you think is possible. No deliverables that feed directly into the client film. Just genuine curiosity — and things worth putting in a portfolio.</div>
+  <div style="display:flex;gap:20px">
+    <div style="padding:14px 20px;background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.2);border-radius:8px;text-align:center;min-width:140px">
+      <div style="font-size:28px;margin-bottom:6px">🌍</div>
+      <div style="font-family:var(--font-display);font-size:16px;color:var(--teal)">MORNING</div>
+      <div style="font-size:11px;color:var(--gray);margin-top:3px">Luma AI Gaussian Splat</div>
+    </div>
+    <div style="padding:14px 20px;background:rgba(123,94,167,0.08);border:1px solid rgba(123,94,167,0.2);border-radius:8px;text-align:center;min-width:140px">
+      <div style="font-size:28px;margin-bottom:6px">🕺</div>
+      <div style="font-family:var(--font-display);font-size:16px;color:var(--purple)">AFTERNOON</div>
+      <div style="font-size:11px;color:var(--gray);margin-top:3px">Plask.ai Motion Capture</div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ SESSION 1 DIVIDER ░░ -->
+<div class="slide session-divider" data-session="Session 1">
+  <div class="session-number">🌍</div>
+  <div class="session-content">
+    <div class="session-tag" style="background:rgba(0,201,177,0.15);color:var(--teal)">Session 1 · 9:15 – 10:30</div>
+    <div class="session-name">LUMA AI<br>SHOW & TELL</div>
+    <div class="session-time">Gaussian Splat · 75 minutes</div>
+  </div>
+</div>
+
+<!-- ░░ THE REVEAL MOMENT ░░ -->
+<div class="slide bg-luma" data-session="Session 1">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(0,201,177,0.08),transparent 55%)"></div>
+  <div class="eyebrow">The Reveal</div>
+  <div class="big-quote" style="margin-bottom:36px">What you're about to see is a real Caribbean location — captured on a phone last night — and reconstructed as a navigable 3D world.</div>
+  <div class="body-text">This is not AI-generated. This is real. And it was made by someone in this room.</div>
+  <div style="margin-top:28px;font-family:var(--font-mono);font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase">Lights low if possible · Full screen · Let it land</div>
+</div>
+
+<!-- ░░ SHOW AND TELL FORMAT ░░ -->
+<div class="slide bg-navy2" data-session="Session 1">
+  <div class="eyebrow">How It Works</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">EVERY TEAM.<br>FIVE MINUTES.</div>
+  <div class="splat-format">
+    <div class="splat-step">
+      <div class="splat-icon">🖥️</div>
+      <div class="splat-body">
+        <div class="splat-title">Navigate live on the projector</div>
+        <div class="splat-desc">Not a screenshot — move through the space. Let the room feel what it's like to be inside a 3D Caribbean environment.</div>
+      </div>
+    </div>
+    <div class="splat-step">
+      <div class="splat-icon">🗣️</div>
+      <div class="splat-body">
+        <div class="splat-title">Tell the room</div>
+        <div class="splat-desc">Where is this? Why did you choose it? What time of day? What were you hoping to capture?</div>
+      </div>
+    </div>
+    <div class="splat-step">
+      <div class="splat-icon">📍</div>
+      <div class="splat-body">
+        <div class="splat-title">Find the angle that excites you most</div>
+        <div class="splat-desc">Navigate to it. Hold it. Let the room see why you chose this moment inside the space.</div>
+      </div>
+    </div>
+    <div class="splat-step">
+      <div class="splat-icon">❓</div>
+      <div class="splat-body">
+        <div class="splat-title">Answer one question from the room</div>
+        <div class="splat-desc">The studio can ask anything. What does this location feel like from inside? What surprised you when you saw the processed result?</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ GROUP REACTION ░░ -->
+<div class="slide bg-navy" data-session="Session 1">
+  <div class="eyebrow">After All Captures</div>
+  <div class="big-quote teal" style="margin-bottom:36px">What surprised you about seeing a real Caribbean location inside a 3D environment?</div>
+  <div class="body-text" style="margin-bottom:20px">What does this feel like — and what could it become?</div>
+  <div style="font-size:13px;color:var(--gray);font-style:italic;max-width:580px">Let the conversation breathe. This is one of the most genuinely strange and wonderful things these students will have experienced this week. Give it space.</div>
+</div>
+
+<!-- ░░ WHERE SPLAT IS USED ░░ -->
+<div class="slide bg-navy2" data-session="Session 1">
+  <div class="eyebrow">The Industry Context</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">THIS TECHNOLOGY<br>IS PROFESSIONAL.</div>
+  <div class="use-cases">
+    <div class="use-case">
+      <div class="use-case-icon">🎬</div>
+      <div class="use-case-title">Virtual Production</div>
+      <div class="use-case-desc">Film studios capture real locations as virtual sets. Actors perform in front of screens with the real location rendered around them.</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-icon">✨</div>
+      <div class="use-case-title">VFX Location Scanning</div>
+      <div class="use-case-desc">Visual effects teams capture real environments so CGI elements can be composited with photographic accuracy.</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-icon">🏛️</div>
+      <div class="use-case-title">Cultural Preservation</div>
+      <div class="use-case-desc">Threatened or sacred sites captured permanently in 3D. A building that burns down still exists. A heritage space never disappears.</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-icon">🌏</div>
+      <div class="use-case-title">Tourism & Real Estate</div>
+      <div class="use-case-desc">Virtual walkthroughs of destinations and spaces before you visit. The Caribbean tourism industry has enormous potential here.</div>
+    </div>
+  </div>
+  <div class="alert-card gold" style="margin-top:16px">
+    <div class="alert-icon">⭐</div>
+    <div class="alert-body">
+      <div class="alert-label">Gold Star</div>
+      <div class="alert-text"><strong>The tool you used last night on your phone is the same fundamental technology that Industrial Light & Magic uses on multi-million dollar productions.</strong> The resolution differs. The principle is identical.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ INDIVIDUAL EXPLORATION ░░ -->
+<div class="slide bg-navy" data-session="Session 1">
+  <div class="eyebrow">Individual Exploration</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:20px">FIND YOUR<br>THREE ANGLES.</div>
+  <div class="two-col" style="max-width:860px">
+    <div class="info-card teal-border">
+      <h3 class="teal">What to do</h3>
+      <ul>
+        <li>Navigate your own splat in detail</li>
+        <li>Find the three most visually interesting viewpoints</li>
+        <li>Screenshot each one and save to your concept library</li>
+        <li>Ask: could any of these serve as a shot in my client's film?</li>
+      </ul>
+    </div>
+    <div class="info-card teal-border">
+      <h3 class="teal">If your capture didn't work</h3>
+      <ul>
+        <li>No problem — use the instructor's pre-captured Caribbean location</li>
+        <li>Do the same exploration exercise</li>
+        <li>Same reflection, same screenshots</li>
+        <li>The experience is identical</li>
+      </ul>
+    </div>
+  </div>
+  <div style="margin-top:20px;font-size:13px;color:var(--gray);font-style:italic">20 minutes · Then portfolio reflection · Then break</div>
+</div>
+
+<!-- ░░ PORTFOLIO REFLECTION ░░ -->
+<div class="slide bg-navy2" data-session="Session 1">
+  <div class="eyebrow">Portfolio Reflection</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">WRITE IT<br>DOWN.</div>
+  <div class="reflection-list">
+    <div class="r-prompt">
+      <div class="r-num">1</div>
+      <div class="r-text">What did you capture and why did you choose this location?</div>
+    </div>
+    <div class="r-prompt">
+      <div class="r-num">2</div>
+      <div class="r-text">What surprised you about the output when you saw it processed?</div>
+    </div>
+    <div class="r-prompt">
+      <div class="r-num">3</div>
+      <div class="r-text">How does this technology connect to your cultural world?</div>
+    </div>
+    <div class="r-prompt">
+      <div class="r-num">4</div>
+      <div class="r-text">Could this location serve your client's film — and if so, how?</div>
+    </div>
+  </div>
+  <div style="margin-top:16px;font-size:13px;color:var(--gray);font-style:italic">3–5 sentences is enough. This goes in your Canva portfolio document alongside your three screenshots.</div>
+</div>
+
+<!-- ░░ BREAK ░░ -->
+<div class="slide bg-dark" data-session="Break">
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center">
+    <div style="font-size:48px">☕</div>
+    <div style="font-family:var(--font-display);font-size:48px;color:var(--white)">BREAK</div>
+    <div style="font-family:var(--font-mono);font-size:13px;color:var(--gray);letter-spacing:2px">10:30 – 10:45</div>
+    <div style="margin-top:20px;font-size:14px;color:var(--gray);font-style:italic;max-width:400px">A genuine break. Not a session. Move around, rest, talk. Back at 10:45.</div>
+  </div>
+</div>
+
+<!-- ░░ SESSION 2 DIVIDER ░░ -->
+<div class="slide session-divider" data-session="Session 2">
+  <div class="session-number" style="font-size:120px">🌍</div>
+  <div class="session-content">
+    <div class="session-tag" style="background:rgba(0,201,177,0.15);color:var(--teal)">Session 2 · 10:45 – 12:00</div>
+    <div class="session-name">SPLAT DEEP DIVE<br>+ CLIENT CONNECTION</div>
+    <div class="session-time">75 minutes · Splat meets OpenArt</div>
+  </div>
+</div>
+
+<!-- ░░ THE CREATIVE QUESTION ░░ -->
+<div class="slide bg-navy" data-session="Session 2">
+  <div class="eyebrow">Session 2</div>
+  <div class="big-quote teal" style="margin-bottom:36px">If you could use one angle from your Gaussian splat as a shot in your client's film — what would it be and why?</div>
+  <div class="body-text">Real-world reference makes AI generation dramatically more specific. The most culturally authentic prompts come from real places you've actually stood in.</div>
+</div>
+
+<!-- ░░ SPLAT TO OPENART WORKFLOW ░░ -->
+<div class="slide bg-navy2" data-session="Session 2">
+  <div class="eyebrow">The Workflow</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">REAL WORLD<br>→ AI GENERATION</div>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:700px">
+    <div style="padding:12px 18px;background:rgba(0,201,177,0.05);border-left:3px solid var(--teal);border-radius:0 6px 6px 0;font-size:13px;color:var(--light)"><strong style="color:var(--teal)">1.</strong> Export the best viewpoint from your splat as a screenshot</div>
+    <div style="padding:12px 18px;background:rgba(0,201,177,0.05);border-left:3px solid var(--teal);border-radius:0 6px 6px 0;font-size:13px;color:var(--light)"><strong style="color:var(--teal)">2.</strong> Brief Claude — describe the location, angle, lighting, and feeling</div>
+    <div style="padding:12px 18px;background:rgba(0,201,177,0.05);border-left:3px solid var(--teal);border-radius:0 6px 6px 0;font-size:13px;color:var(--light)"><strong style="color:var(--teal)">3.</strong> Ask Claude to write an OpenArt prompt that recreates this angle as a cinematic concept image for your client's film</div>
+    <div style="padding:12px 18px;background:rgba(0,201,177,0.05);border-left:3px solid var(--teal);border-radius:0 6px 6px 0;font-size:13px;color:var(--light)"><strong style="color:var(--teal)">4.</strong> Generate in OpenArt — use the splat screenshot as image reference (image-to-image)</div>
+    <div style="padding:12px 18px;background:rgba(240,165,0,0.05);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;font-size:13px;color:var(--light)"><strong style="color:var(--gold)">5.</strong> Add to your concept library with a note: "inspired by Gaussian splat capture"</div>
+  </div>
+  <div class="alert-card gold" style="margin-top:16px">
+    <div class="alert-icon">⭐</div>
+    <div class="alert-body">
+      <div class="alert-label">Gold Star</div>
+      <div class="alert-text"><strong>Real location → informed AI generation → professional client film.</strong> That's a design process story that belongs in any portfolio. This workflow connects something real and Caribbean to something cinematic and professional.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ IF IT DOESN'T CONNECT ░░ -->
+<div class="slide bg-navy" data-session="Session 2">
+  <div class="eyebrow">If the Splat Doesn't Connect to Your Client</div>
+  <div class="big-quote coral" style="margin-bottom:32px">That's fine.<br>The experience is the value,<br>not the output.</div>
+  <div class="body-text">Use this time to generate one final concept image for any gap you identified in your storyboard during Day 4's gallery. Or explore the splat as a pure creative exercise — navigate it, find interesting angles, document what you see. Either way this session belongs to you.</div>
+  <div class="alert-card pin" style="margin-top:24px">
+    <div class="alert-icon">📌</div>
+    <div class="alert-body">
+      <div class="alert-label">Pin It</div>
+      <div class="alert-text">Whatever you produce this session — <strong>add it to your Canva portfolio document.</strong> Label it clearly. Context is everything in a portfolio.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ LUNCH ░░ -->
+<div class="slide bg-dark" data-session="Lunch">
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center">
+    <div style="font-size:56px">🍽️</div>
+    <div style="font-family:var(--font-display);font-size:48px;color:var(--white)">LUNCH BREAK</div>
+    <div style="font-family:var(--font-mono);font-size:13px;color:var(--gray);letter-spacing:2px">12:00 – 1:00 PM</div>
+    <div style="margin-top:28px;padding:16px 24px;background:rgba(123,94,167,0.08);border:1px solid rgba(123,94,167,0.2);border-radius:8px;max-width:480px">
+      <div style="font-size:13px;color:var(--purple);font-style:italic">After lunch: motion capture.<br><br>Think about what movement you want to record. Something that means something to you. Something worth preserving.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ SESSION 3 DIVIDER ░░ -->
+<div class="slide session-divider" data-session="Session 3">
+  <div class="session-number" style="font-size:120px">🕺</div>
+  <div class="session-content">
+    <div class="session-tag" style="background:rgba(123,94,167,0.15);color:var(--purple)">Session 3 · 1:00 – 2:30</div>
+    <div class="session-name">PLASK.AI<br>MOTION CAPTURE</div>
+    <div class="session-time">90 minutes · Your body becomes animation data</div>
+  </div>
+</div>
+
+<!-- ░░ WHAT IS MOTION CAPTURE ░░ -->
+<div class="slide bg-plask" data-session="Session 3">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(123,94,167,0.1),transparent 55%)"></div>
+  <div class="eyebrow purple">Motion Capture</div>
+  <div class="big-quote purple" style="margin-bottom:32px">Every time you've seen an animated character move convincingly — there's a good chance a human performed that movement first.</div>
+  <div class="body-text">Motion capture translates human movement into animation data. Today you do it in a browser — for free — using nothing but your phone camera.</div>
+</div>
+
+<!-- ░░ HOW PLASK WORKS ░░ -->
+<div class="slide bg-navy2" data-session="Session 3">
+  <div class="eyebrow purple">How It Works</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">FOUR STEPS.<br>ONE BROWSER.</div>
+  <div class="plask-flow">
+    <div class="plask-step">
+      <div class="plask-step-icon">🎬</div>
+      <div class="plask-step-num">STEP 1</div>
+      <div class="plask-step-title">Record your movement</div>
+      <div class="plask-step-desc">30–60 seconds. Full body in frame. Good lighting. Plain background helps.</div>
+    </div>
+    <div class="plask-step">
+      <div class="plask-step-icon">📤</div>
+      <div class="plask-step-num">STEP 2</div>
+      <div class="plask-step-title">Upload to Plask.ai</div>
+      <div class="plask-step-desc">Browser-based. No app, no account required. Just upload your video clip.</div>
+    </div>
+    <div class="plask-step">
+      <div class="plask-step-icon">⏳</div>
+      <div class="plask-step-num">STEP 3</div>
+      <div class="plask-step-title">Wait 2–5 minutes</div>
+      <div class="plask-step-desc">Plask analyses frame by frame and extracts the skeleton data from your movement.</div>
+    </div>
+    <div class="plask-step">
+      <div class="plask-step-icon">🦴</div>
+      <div class="plask-step-num">STEP 4</div>
+      <div class="plask-step-title">Watch yourself move in 3D</div>
+      <div class="plask-step-desc">A skeleton that moves exactly as you moved. Exportable to any 3D character.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ WHERE MOCAP IS USED ░░ -->
+<div class="slide bg-navy" data-session="Session 3">
+  <div class="eyebrow purple">The Industry</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">WHERE THIS<br>SKILL LIVES</div>
+  <div class="three-col" style="max-width:900px">
+    <div class="info-card purple-border">
+      <h3 class="purple">Animation Film</h3>
+      <p>Every walking character in a Pixar film has human movement behind it. Motion capture is the invisible performance inside every animated performance.</p>
+    </div>
+    <div class="info-card purple-border">
+      <h3 class="purple">Video Games</h3>
+      <p>Athletes and stunt performers provide the movement data for game characters. Your favourite game's fluid animation came from a real body.</p>
+    </div>
+    <div class="info-card purple-border">
+      <h3 class="purple">Cultural Preservation</h3>
+      <p>Indigenous dance forms, traditional craft movements, ceremonial gestures — captured as animation data and preserved for future generations. A movement that might otherwise be lost.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ THE CULTURAL QUESTION ░░ -->
+<div class="slide bg-plask" data-session="Session 3">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 40% 60%,rgba(123,94,167,0.12),transparent 55%)"></div>
+  <div class="eyebrow purple">The Question That Matters</div>
+  <div class="big-quote purple" style="margin-bottom:36px">What movement from your culture, your family, your identity — is worth preserving?</div>
+  <div class="body-text" style="color:rgba(255,255,255,0.7)">The movement you're about to capture today will exist as animation data. What would you want that to be?</div>
+</div>
+
+<!-- ░░ MOVEMENT IDEAS ░░ -->
+<div class="slide bg-navy2" data-session="Session 3">
+  <div class="eyebrow purple">Choose Your Movement</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">SOMETHING<br>MEANINGFUL.</div>
+  <div class="movement-grid">
+    <div class="movement-card">
+      <div class="movement-icon">🥁</div>
+      <div class="movement-name">Steel Pan Playing</div>
+      <div class="movement-desc">The gesture of a pan player — arms, wrists, rhythm</div>
+    </div>
+    <div class="movement-card">
+      <div class="movement-icon">🎉</div>
+      <div class="movement-name">Carnival Motion</div>
+      <div class="movement-desc">A wine, a jump, a Carnival celebration gesture</div>
+    </div>
+    <div class="movement-card">
+      <div class="movement-icon">🏏</div>
+      <div class="movement-name">Cricket Action</div>
+      <div class="movement-desc">A bowling action, a batting stance, a fielding dive</div>
+    </div>
+    <div class="movement-card">
+      <div class="movement-icon">🤝</div>
+      <div class="movement-name">Cultural Greeting</div>
+      <div class="movement-desc">A handshake, an embrace, a gesture specific to home</div>
+    </div>
+    <div class="movement-card">
+      <div class="movement-icon">🍳</div>
+      <div class="movement-name">Craft or Cooking</div>
+      <div class="movement-desc">A traditional cooking gesture, a craft motion, a skilled hand movement</div>
+    </div>
+    <div class="movement-card">
+      <div class="movement-icon">✨</div>
+      <div class="movement-name">Your Own</div>
+      <div class="movement-desc">Something personal. Something that belongs to you.</div>
+    </div>
+  </div>
+  <div style="margin-top:16px;font-size:13px;color:var(--gray);font-style:italic">30–60 seconds maximum. Deliberate and expressive. Full body in frame.</div>
+</div>
+
+<!-- ░░ SHOW AND TELL — PLASK ░░ -->
+<div class="slide bg-navy" data-session="Session 3">
+  <div class="eyebrow purple">Show & Tell</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">EVERY CAPTURE.<br>ON SCREEN.</div>
+  <div class="body-text" style="margin-bottom:28px">Every skeleton animation goes on the projector. One at a time. Full screen. The studio watches together.</div>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:680px">
+    <div style="padding:12px 16px;border-left:3px solid var(--purple);background:rgba(123,94,167,0.05);font-size:13px;color:var(--light)">What movement did you choose — and why?</div>
+    <div style="padding:12px 16px;border-left:3px solid var(--purple);background:rgba(123,94,167,0.05);font-size:13px;color:var(--light)">Is the movement recognisable in the skeleton output?</div>
+    <div style="padding:12px 16px;border-left:3px solid var(--purple);background:rgba(123,94,167,0.05);font-size:13px;color:var(--light)">What did Plask capture well — and what did it miss?</div>
+  </div>
+  <div class="alert-card purple" style="margin-top:20px">
+    <div class="alert-icon">🕺</div>
+    <div class="alert-body">
+      <div class="alert-label">The Moment</div>
+      <div class="alert-text"><strong>A movement that existed only in this person's body — that might have existed only in this room for the last five minutes — now exists as animation data forever.</strong> Let that land.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ SESSION 4 DIVIDER ░░ -->
+<div class="slide session-divider" data-session="Session 4">
+  <div class="session-number">4</div>
+  <div class="session-content">
+    <div class="session-tag" style="background:rgba(0,201,177,0.15);color:var(--teal)">Session 4 · 2:30 – 3:00</div>
+    <div class="session-name">PORTFOLIO<br>DOCUMENTATION</div>
+    <div class="session-time">30 minutes · Canva · Two pages</div>
+  </div>
+</div>
+
+<!-- ░░ PORTFOLIO SPREAD ░░ -->
+<div class="slide bg-navy" data-session="Session 4">
+  <div class="eyebrow">Your Portfolio</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">TWO PAGES.<br>TWO EXPERIENCES.</div>
+  <div class="portfolio-spread">
+    <div class="portfolio-page luma">
+      <div class="portfolio-page-header">Page 1 — Gaussian Splat</div>
+      <div class="portfolio-page-body">
+        <div class="portfolio-item"><div class="portfolio-item-dot" style="background:var(--teal)"></div>Three screenshots from your splat capture — your best viewpoints</div>
+        <div class="portfolio-item"><div class="portfolio-item-dot" style="background:var(--teal)"></div>Your written reflection — 3 to 5 sentences</div>
+        <div class="portfolio-item"><div class="portfolio-item-dot" style="background:var(--teal)"></div>One sentence: how this changed how you think about AI generation</div>
+        <div class="portfolio-item"><div class="portfolio-item-dot" style="background:var(--teal)"></div>The splat-informed OpenArt image if you made one</div>
+      </div>
+    </div>
+    <div class="portfolio-page plask">
+      <div class="portfolio-page-header">Page 2 — Motion Capture</div>
+      <div class="portfolio-page-body">
+        <div class="portfolio-item"><div class="portfolio-item-dot" style="background:var(--purple)"></div>Screenshot of your skeleton animation in Plask.ai</div>
+        <div class="portfolio-item"><div class="portfolio-item-dot" style="background:var(--purple)"></div>The name of the movement and its cultural significance</div>
+        <div class="portfolio-item"><div class="portfolio-item-dot" style="background:var(--purple)"></div>One sentence: what it felt like to watch your movement become data</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:16px;font-size:13px;color:var(--gray);font-style:italic">Add both pages to your main portfolio document — the one that will sit alongside your client film at the end of camp.</div>
+</div>
+
+<!-- ░░ SESSION 5 DIVIDER ░░ -->
+<div class="slide session-divider" data-session="Session 5">
+  <div class="session-number">5</div>
+  <div class="session-content">
+    <div class="session-tag" style="background:rgba(240,165,0,0.15);color:var(--gold)">Session 5 · 3:00 – 3:45</div>
+    <div class="session-name">WEEK 1 WRAP<br>+ WEEK 2 PREVIEW</div>
+    <div class="session-time">45 minutes · Full group</div>
+  </div>
+</div>
+
+<!-- ░░ WEEK 1 ACKNOWLEDGEMENT ░░ -->
+<div class="slide bg-week2" data-session="Session 5">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 60% 30%,rgba(240,165,0,0.06),transparent 55%)"></div>
+  <div class="eyebrow gold">Week 1 — What Was Built</div>
+  <div class="big-quote gold" style="margin-bottom:32px">Five days ago you walked in as students.<br>You leave today as directors.</div>
+  <div class="body-text">A confirmed client brief. A production bible. A storyboard that maps a real film for a real client. A portfolio with a Gaussian splat and motion capture data in it. <strong>That is not a small thing.</strong></div>
+</div>
+
+<!-- ░░ WHAT YOU BUILT ░░ -->
+<div class="slide bg-navy" data-session="Session 5">
+  <div class="eyebrow gold">The Production Bible</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">LOOK AT WHAT<br>EXISTS NOW.</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:900px;width:100%">
+    <div style="padding:16px;background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:8px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">🎨</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Moodboard</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">Visual world established</div>
+    </div>
+    <div style="padding:16px;background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:8px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">📋</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Creative Brief</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">Direction locked</div>
+    </div>
+    <div style="padding:16px;background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:8px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">👤</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Character</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">Built and saved</div>
+    </div>
+    <div style="padding:16px;background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:8px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">🖼️</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Concept Library</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">5+ strong images</div>
+    </div>
+    <div style="padding:16px;background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.25);border-radius:8px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">📽️</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Storyboard</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">6–10 panels</div>
+    </div>
+    <div style="padding:16px;background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.25);border-radius:8px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">📱</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Reel Storyboard</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">5 frames, 15 seconds</div>
+    </div>
+    <div style="padding:16px;background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.25);border-radius:8px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">🌍</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Gaussian Splat</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">Real Caribbean location</div>
+    </div>
+    <div style="padding:16px;background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.25);border-radius:8px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">🕺</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Motion Capture</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:3px">Your movement, your data</div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ WEEK 2 PREVIEW ░░ -->
+<div class="slide bg-navy2" data-session="Session 5">
+  <div class="eyebrow coral">Week 2 — The Sound Stage Opens</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:20px">NEXT WEEK<br>YOUR FILM<br><span class="accent">GETS A VOICE.</span></div>
+  <div class="week2-days">
+    <div class="w2-day highlight">
+      <div class="w2-day-num">6</div>
+      <div class="w2-day-date">MON<br>JUL 20</div>
+      <div class="w2-day-content">
+        <div class="w2-day-title">Score & Voice</div>
+        <div class="w2-day-desc">Suno AI scores the film scene by scene · ElevenLabs brings the narration to life</div>
+      </div>
+    </div>
+    <div class="w2-day highlight">
+      <div class="w2-day-num">7</div>
+      <div class="w2-day-date">TUE<br>JUL 21</div>
+      <div class="w2-day-content">
+        <div class="w2-day-title">Sound Design</div>
+        <div class="w2-day-desc">The full soundscape — SFX, ambient audio, and the complete audio master locked</div>
+      </div>
+    </div>
+    <div class="w2-day highlight">
+      <div class="w2-day-num">8</div>
+      <div class="w2-day-date">WED<br>JUL 22</div>
+      <div class="w2-day-content">
+        <div class="w2-day-title">Client Meeting 2 + Video Mini-Projects</div>
+        <div class="w2-day-desc">OpenArt video capability revealed · text-to-video, image-to-video, lip sync</div>
+      </div>
+    </div>
+    <div class="w2-day highlight">
+      <div class="w2-day-num">9</div>
+      <div class="w2-day-date">THU<br>JUL 23</div>
+      <div class="w2-day-content">
+        <div class="w2-day-title">Video Production Sprint</div>
+        <div class="w2-day-desc">Day 8 skills applied to the real project · first actual video clips generated</div>
+      </div>
+    </div>
+    <div class="w2-day highlight">
+      <div class="w2-day-num">10</div>
+      <div class="w2-day-date">FRI<br>JUL 24</div>
+      <div class="w2-day-content">
+        <div class="w2-day-title">Soca Beat Machine + Rough Cut</div>
+        <div class="w2-day-desc">Python for the joy of it · then the first rough cut in CapCut — the film begins to exist</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ THE WEEKEND QUESTION ░░ -->
+<div class="slide bg-navy" data-session="Session 5">
+  <div class="eyebrow">For the Weekend</div>
+  <div class="big-quote" style="margin-bottom:36px;font-size:clamp(28px,3.8vw,56px)">If your film had an opening ten seconds — before any voiceover, before any titles — what would the audience see and hear?</div>
+  <div class="body-text" style="color:rgba(255,255,255,0.5)">Don't write it down. Don't answer it now. Just let it sit over the weekend. Come back Monday with an instinct. That instinct will be worth more than anything you'd produce in a session.</div>
+</div>
+
+<!-- ░░ SESSION 6 DIVIDER ░░ -->
+<div class="slide session-divider" data-session="Session 6">
+  <div class="session-number">6</div>
+  <div class="session-content">
+    <div class="session-tag" style="background:rgba(46,204,113,0.15);color:var(--green)">Session 6 · 3:45 – 4:00</div>
+    <div class="session-name">WEEK 1<br>CLOSE</div>
+    <div class="session-time">15 minutes · No slides · Just the room</div>
+  </div>
+</div>
+
+<!-- ░░ THREE THINGS ░░ -->
+<div class="slide bg-close" data-session="Session 6">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(46,204,113,0.06),transparent 55%)"></div>
+  <div class="eyebrow green">The Close</div>
+  <div class="slide-title" style="font-size:clamp(36px,4.5vw,68px);margin-bottom:24px">THREE THINGS.<br>GOING AROUND<br>THE ROOM.</div>
+  <div class="close-questions">
+    <div class="close-q">
+      <div class="close-q-label" style="color:var(--teal)">One Word</div>
+      <div class="close-q-text">How do you feel at the end of Week 1?</div>
+    </div>
+    <div class="close-q">
+      <div class="close-q-label" style="color:var(--gold)">One Thing</div>
+      <div class="close-q-text">What did you make this week that you're most proud of?</div>
+    </div>
+    <div class="close-q">
+      <div class="close-q-label" style="color:var(--coral)">One Thing</div>
+      <div class="close-q-text">What are you most excited about in Week 2?</div>
+    </div>
+  </div>
+  <div style="margin-top:20px;font-size:13px;color:var(--gray);font-style:italic">No elaboration required. Fast, personal, real. Instructor goes last.</div>
+</div>
+
+<!-- ░░ DAY 5 CLOSE ░░ -->
+<div class="slide bg-dark" data-session="Close">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(46,204,113,0.06),transparent 55%)"></div>
+  <div class="eyebrow green">Week 1 Complete</div>
+  <div class="slide-title" style="margin-bottom:20px">HAVE A GOOD<br>WEEKEND.<br><span style="color:var(--green)">YOU EARNED IT.</span></div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:32px">
+    <div style="font-family:var(--font-mono);font-size:12px;color:var(--gray);letter-spacing:1px">✓ &nbsp; Gaussian splat captured and explored</div>
+    <div style="font-family:var(--font-mono);font-size:12px;color:var(--gray);letter-spacing:1px">✓ &nbsp; Motion capture recorded and shown</div>
+    <div style="font-family:var(--font-mono);font-size:12px;color:var(--gray);letter-spacing:1px">✓ &nbsp; Portfolio documented — two pages in Canva</div>
+    <div style="font-family:var(--font-mono);font-size:12px;color:var(--gray);letter-spacing:1px">✓ &nbsp; Week 1 production bible complete</div>
+    <div style="font-family:var(--font-mono);font-size:12px;color:var(--gray);letter-spacing:1px">✓ &nbsp; Week 2 previewed and understood</div>
+  </div>
+  <div style="font-family:var(--font-display);font-size:22px;color:var(--green)">Day 6 — Monday — The sound stage opens.</div>
+  <div style="font-family:var(--font-mono);font-size:12px;color:var(--gray);letter-spacing:1px;margin-top:8px">Rest · Let your brain process · Come back ready to score your film</div>
+</div>
+
+</div><!-- end deck -->
+
+<!-- CONTROLS -->
+<div class="controls">
+  <button class="ctrl-btn" onclick="prevSlide()">← Prev</button>
+  <span class="slide-counter" id="counter">1 / 1</span>
+  <button class="ctrl-btn" onclick="nextSlide()">Next →</button>
+  <button class="ctrl-btn" onclick="toggleNav()" title="Go To (G)">⊞ Go To</button>
+</div>
+<div class="session-indicator" id="session-indicator"></div>
+<div class="progress-bar" id="progress"></div>
+
+<!-- NAVIGATOR -->
+<div id="nav-overlay">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px">
+    <div>
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:3px;color:var(--teal);text-transform:uppercase;margin-bottom:6px">Slide Navigator</div>
+      <div style="font-family:var(--font-display);font-size:32px;color:var(--white)">GO TO SLIDE</div>
+    </div>
+    <button onclick="toggleNav()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--cream);font-family:var(--font-mono);font-size:12px;padding:10px 20px;border-radius:6px;cursor:pointer">✕ Close (Esc)</button>
+  </div>
+  <div id="nav-grid"></div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+let current=0;
+const total=slides.length;
+
+const slideLabels=[
+  'Standby — Explore. Capture. Wonder.',
+  'Energizer — Your Call',
+  'Today\'s Mood — No Client Pressure',
+  '— Session 1: Luma AI Show & Tell —',
+  'The Reveal Moment',
+  'Show and Tell Format',
+  'Group Reaction',
+  'Where Splat Is Used Professionally',
+  'Individual Exploration — Three Angles',
+  'Portfolio Reflection — Four Questions',
+  'Break — 10:30 to 10:45',
+  '— Session 2: Splat Deep Dive —',
+  'The Creative Question',
+  'Real World → AI Generation Workflow',
+  'If the Splat Doesn\'t Connect',
+  'Lunch Break',
+  '— Session 3: Plask.ai Motion Capture —',
+  'What is Motion Capture?',
+  'How Plask Works — Four Steps',
+  'Where Motion Capture Is Used',
+  'The Cultural Question',
+  'Choose Your Movement',
+  'Show and Tell — Plask',
+  '— Session 4: Portfolio Documentation —',
+  'Two Pages. Two Experiences.',
+  '— Session 5: Week 1 Wrap —',
+  'Week 1 Acknowledgement',
+  'Look at What Exists Now',
+  'Week 2 Preview — Five Days',
+  'The Weekend Question',
+  '— Session 6: Week 1 Close —',
+  'Three Things. Going Around the Room.',
+  'Day 5 Complete — Have a Good Weekend',
+];
+
+const sessColors={
+  'Standby':'var(--gray)','Energizer':'var(--teal)',
+  'Session 1':'var(--teal)','Break':'var(--gray)',
+  'Session 2':'var(--teal)','Lunch':'var(--gray)',
+  'Session 3':'var(--purple)','Session 4':'var(--teal)',
+  'Session 5':'var(--gold)','Session 6':'var(--green)',
+  'Close':'var(--green)',
+};
+
+function showSlide(n){
+  slides[current].classList.remove('active');
+  current=Math.max(0,Math.min(n,total-1));
+  slides[current].classList.add('active');
+  document.getElementById('counter').textContent=`${current+1} / ${total}`;
+  document.getElementById('session-indicator').textContent=slides[current].dataset.session||'';
+  document.getElementById('progress').style.width=`${((current+1)/total)*100}%`;
+  document.querySelectorAll('.nav-slide-btn').forEach((b,i)=>{
+    b.classList.toggle('current-slide',i===current);
+  });
+}
+function nextSlide(){showSlide(current+1)}
+function prevSlide(){showSlide(current-1)}
+
+function toggleNav(){
+  const overlay=document.getElementById('nav-overlay');
+  const open=overlay.style.display==='none'||overlay.style.display==='';
+  overlay.style.display=open?'block':'none';
+  if(open)buildNav();
+}
+
+function buildNav(){
+  const grid=document.getElementById('nav-grid');
+  grid.innerHTML='';
+  const sessions={};
+  slides.forEach((s,i)=>{
+    const sess=s.dataset.session||'Other';
+    if(!sessions[sess])sessions[sess]=[];
+    sessions[sess].push(i);
+  });
+  Object.entries(sessions).forEach(([sess,indices])=>{
+    const label=document.createElement('div');
+    label.className='nav-session-label';
+    label.style.color=sessColors[sess]||'var(--gray)';
+    label.textContent=sess;
+    grid.appendChild(label);
+    const row=document.createElement('div');
+    row.className='nav-slides-row';
+    indices.forEach(i=>{
+      const btn=document.createElement('button');
+      btn.className='nav-slide-btn'+(i===current?' current-slide':'');
+      btn.innerHTML=`<div class="nav-slide-num" style="color:${sessColors[sess]||'var(--gray)'}">${i+1}</div><div class="nav-slide-label">${slideLabels[i]||'Slide '+(i+1)}</div>`;
+      btn.onclick=()=>{showSlide(i);toggleNav()};
+      row.appendChild(btn);
+    });
+    grid.appendChild(row);
+  });
+}
+
+document.addEventListener('keydown',e=>{
+  const navOpen=document.getElementById('nav-overlay').style.display==='block';
+  if(e.key==='Escape'&&navOpen){toggleNav();return}
+  if((e.key==='g'||e.key==='G')&&!navOpen){toggleNav();return}
+  if(navOpen)return;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ')nextSlide();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')prevSlide();
+});
+
+let touchX=0;
+document.addEventListener('touchstart',e=>touchX=e.touches[0].clientX);
+document.addEventListener('touchend',e=>{
+  const diff=touchX-e.changedTouches[0].clientX;
+  if(Math.abs(diff)>50){diff>0?nextSlide():prevSlide();}
+});
+
+showSlide(0);
+</script>
+</body>
+</html>
